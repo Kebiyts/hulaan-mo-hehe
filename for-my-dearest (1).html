@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For My Dearest</title>
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#030211;}
+body{font-family:Georgia,'Iowan Old Style',serif;-webkit-font-smoothing:antialiased;}
+body.locked{position:fixed;inset:0;width:100%;overflow:hidden;}
+
+#starfield{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse 70% 40% at 50% 0%, #140c33 0%, #030211 60%);}
+.star{position:absolute;background:#fff6df;border-radius:50%;animation-name:twinkle;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.7);}50%{opacity:1;transform:scale(1.25);}}
+.big-star{position:absolute;animation-name:big-twinkle;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+@keyframes big-twinkle{0%,100%{opacity:.3;transform:scale(.7) rotate(0deg);}50%{opacity:1;transform:scale(1.15) rotate(8deg);}}
+
+#cover{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .7s ease;}
+#cover.hide{opacity:0;pointer-events:none;}
+.envelope-wrap{perspective:900px;display:flex;flex-direction:column;align-items:center;gap:18px;}
+.envelope{all:unset;cursor:pointer;position:relative;width:230px;height:156px;transform-style:preserve-3d;display:block;}
+.envelope:active{transform:scale(.97);}
+.env-body{position:absolute;inset:0;border-radius:6px;background:linear-gradient(160deg,#2a1f4d,#160f2c 60%,#0c0720);box-shadow:0 20px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.05) inset,0 0 40px rgba(130,90,220,.18);}
+.letter-peek{position:absolute;left:50%;bottom:10px;width:170px;height:68px;margin-left:-85px;background:#f8f1de;border-radius:3px 3px 0 0;box-shadow:0 -3px 14px rgba(0,0,0,.3);transform:translateY(16px);opacity:0;transition:transform .9s cubic-bezier(.19,1,.22,1) .35s,opacity .5s ease .35s;z-index:2;}
+.env-flap{position:absolute;top:0;left:0;width:100%;height:60%;clip-path:polygon(0 0,100% 0,50% 100%);background:linear-gradient(200deg,#352869,#1a1336);transform-origin:top center;transform:rotateX(0deg);transition:transform .8s cubic-bezier(.65,0,.35,1);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset;z-index:3;}
+.envelope.open .env-flap{transform:rotateX(-170deg);}
+.envelope.open .letter-peek{transform:translateY(-32px);opacity:1;}
+.seal{position:absolute;left:50%;top:34%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffb0e0,#c23b7c 55%,#6e1c50 100%);box-shadow:0 0 18px 4px rgba(255,110,190,.5),0 2px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;animation:seal-pulse 2.6s ease-in-out infinite;z-index:4;}
+.seal span{color:#fff6f0;font-size:17px;}
+@keyframes seal-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.tap-hint{color:#cdbfff;opacity:.7;font:italic 14px/1 Georgia,serif;letter-spacing:.04em;animation:hint-pulse 2.4s ease-in-out infinite;margin:0;}
+@keyframes hint-pulse{0%,100%{opacity:.35;}50%{opacity:.85;}}
+
+main.content{position:relative;z-index:2;padding:60px 20px 90px;display:block;}
+body.locked main.content{display:none;}
+.letter-section{display:flex;justify-content:center;}
+.letter-card{max-width:460px;width:100%;padding:36px 26px 30px;background:linear-gradient(175deg,#fbf3e3,#f2e6cd);border-radius:10px;box-shadow:0 0 70px rgba(170,120,255,.16),0 30px 60px rgba(0,0,0,.55);position:relative;}
+.rn-caption{display:flex;flex-wrap:wrap;justify-content:center;gap:5px 4px;margin:0 0 24px;}
+.rn-letter{display:inline-flex;align-items:center;justify-content:center;padding:4px 7px 6px;line-height:1;font-weight:700;border-radius:2px;box-shadow:1px 2px 3px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.08) inset;transform:rotate(var(--rot)) translateY(var(--ty));}
+.rn-space{width:9px;}
+.letter-body{font-size:17px;line-height:1.8;color:#3a2f46;}
+.letter-body p{margin:0 0 18px;}
+.letter-body .quote-line{font-style:italic;color:#5b4a73;}
+.letter-body .closing-poem{font-style:italic;text-align:center;}
+.letter-body .final-emoji{text-align:center;font-size:20px;color:#9548c9;margin-top:-6px;}
+
+.scroll-cue{display:flex;justify-content:center;margin:34px 0 0;opacity:.6;animation:cue-bounce 2.2s ease-in-out infinite;}
+.scroll-cue svg{width:22px;height:22px;}
+@keyframes cue-bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+
+.flower-section{position:relative;max-width:480px;margin:50px auto 0;padding:0 10px;}
+.plant{width:100%;height:auto;display:block;opacity:0;transition:opacity 1s ease;}
+.bloom .plant{opacity:1;}
+.ground-glow{opacity:0;}
+.bloom .ground-glow{animation:pulse-glow 5s ease-in-out infinite;}
+@keyframes pulse-glow{0%,100%{opacity:.5;}50%{opacity:1;}}
+.center-glow-outer,.center-glow{opacity:0;}
+.bloom .center-glow-outer{animation:glow-in 3.4s ease-out .2s forwards;}
+.bloom .center-glow{animation:glow-in 3s ease-out .3s forwards;}
+@keyframes glow-in{to{opacity:1;}}
+.leaf{transform-box:fill-box;transform-origin:50% 100%;opacity:0;transform:scale(.55);}
+.bloom .leaf{animation:leaf-in 1.5s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes leaf-in{0%{opacity:0;transform:scale(.55);}100%{opacity:1;transform:scale(1);}}
+.stem{stroke-dasharray:360;stroke-dashoffset:360;}
+.bloom .stem{animation:stem-grow 1.7s ease-out forwards;}
+@keyframes stem-grow{to{stroke-dashoffset:0;}}
+.bloom .flower-head{animation:head-sway 6.5s ease-in-out infinite;animation-delay:3.2s;}
+@keyframes head-sway{0%,100%{transform:translate(200px,270px) rotate(-1.1deg);}50%{transform:translate(200px,270px) rotate(1.1deg);}}
+.petal{transform-origin:0 0;transform:rotate(0deg) scale(.08);opacity:.85;}
+.bloom .petal{animation:bloom-anim 3s cubic-bezier(.34,1.3,.36,1) forwards;}
+@keyframes bloom-anim{0%{transform:rotate(0deg) scale(.08);opacity:.7;}60%{transform:rotate(calc(var(--angle)*1.06)) scale(calc(var(--scale-final)*1.06));opacity:1;}100%{transform:rotate(var(--angle)) scale(var(--scale-final));opacity:1;}}
+.stamen{transform-origin:0 0;transform:rotate(var(--angle)) scale(.05);opacity:0;}
+.bloom .stamen{animation:stamen-in 1.8s ease-out forwards;}
+@keyframes stamen-in{0%{transform:rotate(var(--angle)) scale(.05);opacity:0;}100%{transform:rotate(var(--angle)) scale(1);opacity:1;}}
+.sparkle{fill:#fff8e4;opacity:0;transform-box:fill-box;transform-origin:center;}
+.bloom .sparkle{animation-name:sparkle-twinkle;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+@keyframes sparkle-twinkle{0%,100%{opacity:0;transform:scale(.4);}50%{opacity:1;transform:scale(1.15);}}
+
+.mote-field{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+.mote{position:absolute;width:5px;height:5px;border-radius:50%;background:#cdb8ff;box-shadow:0 0 6px 2px rgba(205,184,255,.85),0 0 16px 6px rgba(159,232,255,.3);opacity:0;}
+.bloom .mote{animation-name:mote-float;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+@keyframes mote-float{0%{transform:translate(0,0) scale(.3);opacity:0;}12%{opacity:1;}50%{transform:translate(calc(var(--tx)*.55),calc(var(--ty)*.55)) scale(1);opacity:1;}88%{opacity:.7;}100%{transform:translate(var(--tx),var(--ty)) scale(.35);opacity:0;}}
+
+.mute-btn{position:fixed;right:16px;bottom:16px;z-index:40;width:46px;height:46px;border-radius:50%;border:none;background:rgba(20,14,40,.65);color:#f3e9ff;font-size:17px;opacity:0;pointer-events:none;transition:opacity .5s ease;cursor:pointer;}
+body:not(.locked) .mute-btn{opacity:.85;pointer-events:auto;}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
+}
+</style>
+</head>
+<body class="locked">
+<noscript><p style="color:#eee;text-align:center;padding:40px;">This page needs JavaScript enabled to open.</p></noscript>
+
+<div id="starfield">
+<div class="star" style="width:1.4px;height:1.4px;left:22.3%;top:72.7%;animation-duration:3.64s;animation-delay:2.71s;"></div>
+<div class="star" style="width:1.7px;height:1.7px;left:3.0%;top:74.4%;animation-duration:2.35s;animation-delay:2.02s;"></div>
+<div class="star" style="width:2.0px;height:2.0px;left:54.5%;top:5.2%;animation-duration:2.35s;animation-delay:2.36s;"></div>
+<div class="star" style="width:2.3px;height:2.3px;left:69.8%;top:72.2%;animation-duration:2.65s;animation-delay:0.62s;"></div>
+<div class="star" style="width:1.1px;height:1.1px;left:9.7%;top:81.4%;animation-duration:3.92s;animation-delay:2.41s;"></div>
+<div class="star" style="width:1.9px;height:1.9px;left:97.3%;top:92.4%;animation-duration:2.75s;animation-delay:2.21s;"></div>
+<div class="star" style="width:2.4px;height:2.4px;left:57.7%;top:89.3%;animation-duration:3.56s;animation-delay:0.18s;"></div>
+<div class="star" style="width:1.1px;height:1.1px;left:23.3%;top:7.5%;animation-duration:2.05s;animation-delay:1.11s;"></div>
+<div class="star" style="width:1.6px;height:1.6px;left:21.0%;top:82.2%;animation-duration:2.47s;animation-delay:3.75s;"></div>
+<div class="star" style="width:1.3px;height:1.3px;left:72.9%;top:89.1%;animation-duration:2.21s;animation-delay:1.52s;"></div>
+<div class="star" style="width:1.9px;height:1.9px;left:68.5%;top:89.9%;animation-duration:3.91s;animation-delay:3.1s;"></div>
+<div class="star" style="width:1.5px;height:1.5px;left:26.8%;top:0.8%;animation-duration:2.33s;animation-delay:3.77s;"></div>
+<div class="star" style="width:2.0px;height:2.0px;left:39.6%;top:80.8%;animation-duration:4.09s;animation-delay:1.84s;"></div>
+<div class="star" style="width:1.9px;height:1.9px;left:26.3%;top:6.4%;animation-duration:3.26s;animation-delay:3.59s;"></div>
+<div class="star" style="width:2.6px;height:2.6px;left:51.0%;top:5.7%;animation-duration:2.03s;animation-delay:0.19s;"></div>
+<div class="star" style="width:2.3px;height:2.3px;left:42.2%;top:16.3%;animation-duration:1.96s;animation-delay:1.53s;"></div>
+<div class="star" style="width:2.6px;height:2.6px;left:86.1%;top:86.8%;animation-duration:1.83s;animation-delay:2.88s;"></div>
+<div class="star" style="width:1.4px;height:1.4px;left:64.1%;top:87.0%;animation-duration:2.08s;animation-delay:1.74s;"></div>
+<div class="star" style="width:2.4px;height:2.4px;left:26.3%;top:69.9%;animation-duration:3.05s;animation-delay:0.71s;"></div>
+<div class="star" style="width:1.5px;height:1.5px;left:63.9%;top:96.4%;animation-duration:3.32s;animation-delay:0.61s;"></div>
+<div class="star" style="width:2.2px;height:2.2px;left:53.0%;top:87.1%;animation-duration:1.8s;animation-delay:1.3s;"></div>
+<div class="star" style="width:2.4px;height:2.4px;left:83.2%;top:24.2%;animation-duration:2.57s;animation-delay:0.23s;"></div>
+<div class="star" style="width:1.1px;height:1.1px;left:48.6%;top:98.5%;animation-duration:1.97s;animation-delay:3.04s;"></div>
+<div class="star" style="width:1.8px;height:1.8px;left:55.0%;top:75.6%;animation-duration:2.46s;animation-delay:3.49s;"></div>
+<div class="star" style="width:1.9px;height:1.9px;left:73.0%;top:35.7%;animation-duration:2.3s;animation-delay:1.25s;"></div>
+<div class="star" style="width:1.7px;height:1.7px;left:51.8%;top:90.2%;animation-duration:2.1s;animation-delay:0.9s;"></div>
+<div class="star" style="width:1.4px;height:1.4px;left:22.0%;top:15.3%;animation-duration:1.98s;animation-delay:2.52s;"></div>
+<div class="star" style="width:2.4px;height:2.4px;left:7.1%;top:23.5%;animation-duration:2.4s;animation-delay:2.68s;"></div>
+<div class="star" style="width:2.5px;height:2.5px;left:57.1%;top:3.4%;animation-duration:2.98s;animation-delay:3.14s;"></div>
+<div class="star" style="width:1.2px;height:1.2px;left:43.1%;top:77.3%;animation-duration:2.86s;animation-delay:1.87s;"></div>
+<svg class="big-star" viewBox="0 0 24 24" style="width:14.0px;height:14.0px;left:90.6%;top:16.0%;animation-duration:3.42s;animation-delay:2.01s;"><path d="M12 0 C12.6 6.2 13.6 10.4 24 12 C13.6 13.6 12.6 17.8 12 24 C11.4 17.8 10.4 13.6 0 12 C10.4 10.4 11.4 6.2 12 0 Z" fill="#e4d8ff"/></svg>
+<svg class="big-star" viewBox="0 0 24 24" style="width:10.7px;height:10.7px;left:20.9%;top:95.2%;animation-duration:4.38s;animation-delay:0.7s;"><path d="M12 0 C12.6 6.2 13.6 10.4 24 12 C13.6 13.6 12.6 17.8 12 24 C11.4 17.8 10.4 13.6 0 12 C10.4 10.4 11.4 6.2 12 0 Z" fill="#fff6df"/></svg>
+<svg class="big-star" viewBox="0 0 24 24" style="width:11.5px;height:11.5px;left:85.2%;top:6.1%;animation-duration:4.17s;animation-delay:4.31s;"><path d="M12 0 C12.6 6.2 13.6 10.4 24 12 C13.6 13.6 12.6 17.8 12 24 C11.4 17.8 10.4 13.6 0 12 C10.4 10.4 11.4 6.2 12 0 Z" fill="#fff6df"/></svg>
+<svg class="big-star" viewBox="0 0 24 24" style="width:16.0px;height:16.0px;left:77.6%;top:77.2%;animation-duration:5.33s;animation-delay:4.63s;"><path d="M12 0 C12.6 6.2 13.6 10.4 24 12 C13.6 13.6 12.6 17.8 12 24 C11.4 17.8 10.4 13.6 0 12 C10.4 10.4 11.4 6.2 12 0 Z" fill="#fff6df"/></svg>
+<svg class="big-star" viewBox="0 0 24 24" style="width:12.9px;height:12.9px;left:22.8%;top:3.7%;animation-duration:4.08s;animation-delay:0.29s;"><path d="M12 0 C12.6 6.2 13.6 10.4 24 12 C13.6 13.6 12.6 17.8 12 24 C11.4 17.8 10.4 13.6 0 12 C10.4 10.4 11.4 6.2 12 0 Z" fill="#e4d8ff"/></svg>
+<svg class="big-star" viewBox="0 0 24 24" style="width:12.3px;height:12.3px;left:85.5%;top:76.1%;animation-duration:4.93s;animation-delay:1.43s;"><path d="M12 0 C12.6 6.2 13.6 10.4 24 12 C13.6 13.6 12.6 17.8 12 24 C11.4 17.8 10.4 13.6 0 12 C10.4 10.4 11.4 6.2 12 0 Z" fill="#e4d8ff"/></svg>
+<svg class="big-star" viewBox="0 0 24 24" style="width:11.8px;height:11.8px;left:89.2%;top:3.4%;animation-duration:4.47s;animation-delay:2.71s;"><path d="M12 0 C12.6 6.2 13.6 10.4 24 12 C13.6 13.6 12.6 17.8 12 24 C11.4 17.8 10.4 13.6 0 12 C10.4 10.4 11.4 6.2 12 0 Z" fill="#e4d8ff"/></svg>
+</div>
+
+<div id="cover">
+  <div class="envelope-wrap">
+    <button id="envelope" class="envelope" aria-label="Open the envelope">
+      <div class="env-body"></div>
+      <div class="letter-peek"></div>
+      <div class="env-flap"><div class="seal"><span>&#10084;</span></div></div>
+    </button>
+    <p class="tap-hint">tap to open</p>
+  </div>
+</div>
+
+<main class="content">
+  <section class="letter-section">
+    <div class="letter-card">
+      <div class="rn-caption"><span class="rn-letter" style="--rot:-1.9deg;--ty:-2.7px;font-family:'Courier New', monospace;font-size:28px;background:#b3203d;color:#ffffff;">F</span><span class="rn-letter" style="--rot:1.5deg;--ty:2.5px;font-family:Verdana, sans-serif;font-size:23px;background:#f4ecd8;color:#2a2a2a;">O</span><span class="rn-letter" style="--rot:-1.2deg;--ty:-2.6px;font-family:'Arial Black', Arial, sans-serif;font-size:21px;background:#f4ecd8;color:#2a2a2a;">R</span><span class="rn-space"></span><span class="rn-letter" style="--rot:-7.9deg;--ty:0.4px;font-family:'Trebuchet MS', sans-serif;font-size:23px;background:#ffffff;color:#141414;">M</span><span class="rn-letter" style="--rot:1.4deg;--ty:-0.6px;font-family:Georgia, serif;font-size:23px;background:#1c2d52;color:#f4ecd8;">Y</span><span class="rn-space"></span><span class="rn-letter" style="--rot:-3.8deg;--ty:-2.1px;font-family:'Courier New', monospace;font-size:21px;background:#f4ecd8;color:#2a2a2a;">D</span><span class="rn-letter" style="--rot:1.1deg;--ty:1.1px;font-family:'Times New Roman', serif;font-size:21px;background:#ffffff;color:#141414;">E</span><span class="rn-letter" style="--rot:-2.3deg;--ty:0.3px;font-family:Impact, 'Arial Narrow Bold', sans-serif;font-size:21px;background:#ffffff;color:#141414;">A</span><span class="rn-letter" style="--rot:2.1deg;--ty:-0.0px;font-family:Georgia, serif;font-size:28px;background:#ffffff;color:#141414;">R</span><span class="rn-letter" style="--rot:-0.6deg;--ty:2.5px;font-family:Verdana, sans-serif;font-size:25px;background:#e8b73c;color:#2a1400;">E</span><span class="rn-letter" style="--rot:5.3deg;--ty:1.2px;font-family:Impact, 'Arial Narrow Bold', sans-serif;font-size:23px;background:#b3203d;color:#ffffff;">S</span><span class="rn-letter" style="--rot:0.5deg;--ty:2.3px;font-family:'Times New Roman', serif;font-size:27px;background:#f4ecd8;color:#2a2a2a;">T</span></div>
+      <div class="letter-body">
+<p>My love,</p>
+<p>There are times when I try to imagine what our future might look like, and somehow, the things I see aren't really the grand things people usually dream about when they talk about forever. I don't immediately picture some enormous house, some perfect life, or some extraordinary adventure where everything falls perfectly into place.</p>
+<p>I picture you.<br>I picture us.<br>And somehow, that feels so much more beautiful to me.</p>
+<p>I imagine mornings where neither of us really wants to leave the warmth of the bed. One of us would already be awake, probably pretending to be asleep just to keep the other there a little longer, until eventually one of us pulls the other back down and quietly says, "Five more minutes." Then five minutes becomes ten, ten becomes twenty, and suddenly we're both laughing because we know perfectly well we're supposed to be doing something else.</p>
+<p>I want a life where that kind of thing is ordinary.<br>Where loving you isn't something I have to wait for special occasions to do.<br>Where I can wake up and you're simply there.<br>Where the person I love most in this world is also the person I get to annoy before either of us has even properly started the day.</p>
+<p>I want to bake with you too. And knowing us, I'm sure we'd somehow turn something as simple as baking into complete nonsense. We'd probably be arguing over who gets to taste the frosting, pretending not to notice the flour on each other's faces, and eventually one of us would smear icing onto the other's cheek and immediately run away laughing.</p>
+<p>And I don't just want the picture-perfect parts of that memory.<br>I want the messy kitchen.<br>The failed recipes.<br>The burnt things we swear we can still eat.<br>The dishes we don't want to wash afterward.<br>The laughter that makes us forget what we were even trying to make in the first place.</p>
+<p>Because that's what I mean when I say I want a life with you. I don't only want the beautiful moments that would look good written down. I want the moments that nobody else would think are worth remembering.</p>
+<p>I want the ordinary.<br>I want the mundane.<br>I want the wonderfully uneventful parts of life that somehow become precious simply because you're there.</p>
+<p>I want to lie beside you on the bed, or sink into the sofa with you, and talk until we realize we've been talking for hours. I want to hear about the things you're hoping for, the things you're afraid of, the places you want to see, the person you want to become. I want to tell you about my own dreams too, even the ones I haven't figured out yet.</p>
+<p>I want us to talk about our future not because we already know exactly what it will be, but because I want to discover it with you.</p>
+<p>I want to know what kind of home you'd want.<br>What kind of mornings you'd like.<br>Where you'd want us to go.<br>What we'd save up for.<br>What we'd laugh about when we're older.<br>What silly traditions we'd accidentally create without even realizing it.<br>I want to know all of it.</p>
+<p>And maybe one day we'll be standing in the bathroom, doing absolutely nothing important, and somehow we'll start splashing water at each other. You'll get annoyed because I ruined your hair, I'll laugh because you ruined mine too, and eventually we'll just stand there looking at each other like two complete idiots.</p>
+<p>I want that too.</p>
+<p>I want to yell sweet things at you from the top of the stairs just because I know you'll hear me.<br>I want to call your name from another room.<br>I want to hear you answer.<br>I want to say something completely ridiculous and hear you laugh from somewhere in the house.</p>
+<p>I want the kind of love where your presence becomes woven into the background of my life so naturally that even the smallest things begin to carry the warmth of you.</p>
+<p>Because I think that's what I mean when I say I want more.</p>
+<p>I don't mean that what we have isn't enough.</p>
+<p>I mean that somehow, even when I am already given so much of you, my heart still finds itself wanting another day, another conversation, another morning, another memory.</p>
+<p>I'm greedy when it comes to you.<br>But it's a strange kind of greed.<br>I don't need extravagant things.<br>I don't need every day to be some grand romantic occasion.</p>
+<p>I would be perfectly happy doing the most boring things in the world if I got to do them beside you.</p>
+<p>I'd go grocery shopping with you.<br>I'd wait while you take forever to choose something.<br>I'd sit beside you while you're busy doing something completely unrelated to me.<br>I'd accompany you on errands that neither of us particularly wants to do.<br>I'd even love those quiet moments where we're both doing our own things, but every once in a while we look at each other just to remember that we're there.</p>
+<p>Because with you, even boredom sounds like a future I could be happy living in.</p>
+<p>And I know I'm going to be the same way even if distance eventually becomes part of our story.</p>
+<p>I'd still want to give you things.<br>I'd still see something and think of you.<br>I'd still want to surprise you with something small just because I happened to see it and thought, "She'd like this."<br>I'd still want to send you pieces of my day.<br>I still want to hear about yours.</p>
+<p>Distance could change the way we reach each other, but I don't think it could change how much I want to reach for you.</p>
+<p>That's one of the reasons "country" by Lizzy McAlpine makes me think of you.</p>
+<p>There's something about that song that makes me think about distance in a way that doesn't feel like an ending. It makes me think about how there can be miles between two people, how there can be waiting, how there can be time that has to pass before you're finally together again, and yet none of that makes the person feel any less worth reaching.</p>
+<p>And when I think about you, that's how it feels.</p>
+<p>Even if I haven't moved away yet hehe, I still wanted to tell you this because the thought has been sitting with me.</p>
+<p>If there ever comes a time when there are cities, countries, or long stretches of time between us, I don't want you to think of that distance as something that makes loving you less worthwhile.</p>
+<p>If anything, I think I'd just become more aware of how precious every moment with you is.<br>Because if I had to cross an ocean just to spend one evening beside you, I'd still want that evening.<br>If I had to wait months for another ordinary morning with you, I'd still wait for it.<br>Not because waiting is beautiful by itself, but because you're on the other side of it.</p>
+<p>You make the waiting worth it.<br>You make the distance worth crossing.<br>You make the time worth spending.</p>
+<p>And I think that is one of the most beautiful things about loving someone.<br>It's not that the world suddenly becomes easy.<br>It's that one person becomes worth all the difficult parts.</p>
+<p>I think about how, back then, I could still tell myself, "Maybe wala lang 'to."<br>Maybe it was nothing.<br>Maybe it was just a phase.<br>Maybe I was simply enjoying having someone around.</p>
+<p>But look at me now.</p>
+<p>Nasayo at nasayo na mga Sabado ko.</p>
+<p>Somehow, you became part of the days I used to think were ordinary.<br>And I don't even know exactly when it happened.</p>
+<p>I just know that somewhere between the conversations, the little moments, the laughter, the waiting, the Dokito Burger, and all those seemingly insignificant pieces of time, you became someone my heart started making room for without asking permission.</p>
+<p>And then one day I realized that I wasn't just looking forward to Saturdays anymore.<br>I was looking forward to you.</p>
+<p>And perhaps that's why I am so certain that what I want with you isn't limited to some beautiful version of our lives.</p>
+<p>I don't just want the easy you.<br>I don't just want the happy you.<br>I don't just want the version of you who has everything figured out and is having a wonderful day.</p>
+<p>I want you.</p>
+<p>Even when everything sucks.</p>
+<p>Actually, heck, I think I want you even more then.<br>Because WDYM we're both a mess??<br>I WANT YOU EVEN MORE NOW.</p>
+<p>I don't expect us to become perfect people just because we love each other. I don't want us to have some imaginary relationship where neither of us ever struggles, never gets tired, never misunderstands the other, and never has an ugly day.</p>
+<p>I want something real.<br>Something that can survive being human.<br>Something where we can both be tired and still choose tenderness.<br>Where we can both be overwhelmed and still remember that we're on the same side.<br>Where one of us can have a terrible day without becoming less deserving of love.<br>Where we can be unfinished people and still find a home in each other while we're growing.</p>
+<p>I want to take care of you.</p>
+<p>Not because I think you are incapable of taking care of yourself, but because loving someone makes you want to make their burdens a little lighter when you can.</p>
+<p>And I want you to take care of me too.</p>
+<p>I want us to be two people who can lean on each other without losing ourselves.<br>Two people who can be independent and still come home to one another.<br>Two people who can say, "I have you," and actually mean it.</p>
+<p>You could be the love of my life, my mi amor, my woven half of a soul, and I'd still want to be ridiculous with you.</p>
+<p>I'd still want to make stupid jokes.<br>I'd still want to bother you for no reason.<br>I'd still want to laugh at things that probably aren't even funny.<br>I'd still want to hear your laugh.<br>I'd still want to be your best friend.</p>
+<p>Because that's the thing about you that I don't ever want to lose.</p>
+<p>You let me be deeply, completely in love with you while also letting me be completely myself.</p>
+<p>I don't have to become some grander, more poetic version of myself to deserve you.<br>I can simply be me.<br>The person who talks too much.<br>The person who gets excited over little things.<br>The person who wants to give you gifts even when there isn't an occasion.</p>
+<p>The person whose mouth apparently never knows when to stop when it comes to telling you how much he loves you. You may never seem to believe my runny mouth, but I need you to know that underneath every ridiculous thing I say is something very sincere.</p>
+<p>I fell in love with you before I kissed you.<br>I fell in love with you before I touched you.<br>Before any of that, I was already falling for the person you were.</p>
+<p>I fell for the way you made ordinary moments feel like they had somewhere to stay in my memory.</p>
+<p>I fell for your voice.<br>Your laughter.<br>Your little habits.<br>The way you tell stories.<br>The way you care.<br>The way you can be so wonderfully yourself without realizing how much of yourself there is to love.</p>
+<p>And maybe that's why I've never thought of what I feel for you as something that began with a kiss or a touch. Those things are beautiful, of course. But they were never the beginning. The beginning was me knowing you. The beginning was my soul becoming familiar with yours before I even knew what to call that familiarity. And meeting you was, and still is, the best thing that's EVER EVER happened to me.</p>
+<p>Oh, my dear Alaia.</p>
+<p>How much I loveeee youuu.</p>
+<p>My baby.<br>My girlfriend.<br>My wife.<br>My only.<br>My world.<br>My love.<br>My sweet, sweet girl.<br>My pretty girl.<br>My everything.</p>
+<p>I don't say those things because I want to make you into some possession or some perfect idea in my head. I say them because sometimes there are simply too many ways I want to tell you that you matter to me, and one name isn't enough to hold all of it.</p>
+<p>You are the person I want beside me.<br>The person I want to come home to.<br>The person I want to tell when something good happens.<br>The person I want to hold close when something hurts.<br>The person I want beside me when life is beautiful and when it isn't.</p>
+<p>And oh, how I'd love to see the Netherlands with you.<br>Or Oregon. Or anywhere, really.</p>
+<p>I want to travel with you, not just because I want to see beautiful places, but because I want to know what those places feel like when you're standing beside me. I want photographs of us that aren't perfect. I want the blurry ones.</p>
+<p>The ones where one of us is laughing.<br>The ones where we're looking in the wrong direction.<br>The ones where we look tired after walking all day.<br>The ones that remind us, years later, exactly how it felt to be there together.</p>
+<p>And maybe, if life is kind enough to give me the chance, I want to become rich enough to take you somewhere so high above everything that the world below us becomes tiny.</p>
+<p>I want to take you to the stars.</p>
+<p>And when you look up at them, I want to tell you that I spent so long trying to find the brightest thing in the sky only to realize that I had already found it.</p>
+<p>You.</p>
+<p>There's this line I've made before that I can't seem to abolish:</p>
+<p class="quote-line">I listen to you and do not tire, look at you and cannot get enough.</p>
+<p>And I think I keep returning to it because it says something I can't quite replace.</p>
+<p>I could listen to you for years.<br>I could watch the same little expressions cross your face and still notice something new.<br>I could know your stories and still want to hear you tell them.<br>I could wake up beside you for a thousand mornings and still have that quiet little thought of, "You're really here."</p>
+<p>I don't think love always has to feel like fireworks.<br>Sometimes I think it feels more like recognition.<br>Like your soul quietly saying, "There you are."</p>
+<p>And that's what you feel like to me.<br>A kind of recognition I didn't know I was waiting for.</p>
+<p>Mukhang marami nang fantasy ang mga tao ngayon, noh?</p>
+<p>Paano kaya yung sa akin, mahal ko? Hmmmm.</p>
+<p>Kung sa akin...ay makasama ka sa lahat ng istasyon ng tren.<br>Marahil matitiis ko lahat ng pagpreno ng tren basta ako'y sasalo sa'yo.</p>
+<p>I'd sit beside you through every departure and every arrival.<br>I'd watch places change outside the window.<br>I'd let the world rush past us while we stayed there together.</p>
+<p>And even if the journey took longer than expected, I think I'd be okay with it.<br>Because maybe the destination was never the only thing I wanted.<br>Maybe I just wanted someone to travel with.<br>And somehow, I found you.</p>
+<p>You feel like a wish that came true, my love.<br>Not a wish that made everything perfect.<br>A wish that made everything more meaningful.<br>A wish that made me look at the future and actually want to see it.</p>
+<p>And I love the way I trust the rhythm of your heart even when I'm scared.</p>
+<p>Because loving someone means giving them the ability to hurt you, and somehow, despite that fear, I still want to open my heart to you.</p>
+<p>I still want to choose you.<br>I still want to believe in what we're building.</p>
+<p>And sometimes I think about how close I came to never knowing you at all.</p>
+<p>If we weren't inclined toward that Dokito Burger, if that little moment had gone differently, if some tiny part of our lives had shifted just a little, I might have missed getting to know the most beautiful love that life had kept in store for me.</p>
+<p>Isn't that strange? That something so small can change the entire shape of your life?</p>
+<p>One ordinary moment.<br>One conversation.<br>One Saturday.<br>One person.</p>
+<p>And suddenly, the future looks different. Suddenly, there is someone you want to bring with you into it. That's what you became for me.</p>
+<p>Not just someone I love right now.<br>Someone I want to carry into all the versions of tomorrow I haven't met yet.</p>
+<p>And that's why when I say I want more, I don't mean I want more because you aren't enough.</p>
+<p>I want more because you are someone I can imagine an entire lifetime with. I want every season. Every distance. Every home. Every train ride. Every kitchen. Every quiet night. Every stupid argument we eventually laugh about. Every celebration. Every difficult day. Every "five more minutes." Every ordinary Saturday. Every version of us that time allows me to meet.</p>
+<p>I want to grow older with you and still recognize the girl I first fell for somewhere underneath all the years.</p>
+<p>I want to watch you change without ever expecting you to stay exactly the same.<br>I want to change too, and I want us to keep learning each other as we do.</p>
+<p>Because I don't want to love some frozen version of you from one particular moment in time. I want to love you as you become. Again and again. In every new chapter. And if eternity is too large a word for anyone to promise, then let me put it more simply:</p>
+<p>I want as much of life with you as life will give us.</p>
+<p>I want the years.<br>I want the mornings.<br>I want the nights.<br>I want the laughter.<br>I want the silence.<br>I want the distance when we have to endure it.<br>I want the reunions when we finally don't.<br>I want the ordinary days that nobody else would think twice about.<br>I want all of it.</p>
+<p>Because it is you.</p>
+<p>And if I am given the choice of a thousand extraordinary lives without you or one imperfect, ordinary life where I get to find you beside me again and again, my heart already knows where it belongs.</p>
+<p>So yes, my love.<br>I'm greedy.</p>
+<p>But maybe that's because when I look at you, I don't only see someone I love in the present. I see someone I can imagine in the little corners of my future, the parts I haven't written yet, the places I haven't been, the mornings I haven't woken up to, the stories I haven't lived.</p>
+<p>And I think that's what I've been trying to tell you this whole time.<br>I don't want some perfect version of forever.</p>
+<p>I want ours.</p>
+<p>The kind that has flour on the kitchen counter and wet hair in the bathroom. The kind that has sleepy conversations, ridiculous arguments, long silences, spontaneous gifts, missed calls, terrible days, and laughter that comes from absolutely nowhere. The kind where sometimes we have everything figured out, and sometimes we're both just sitting there wondering what the hell we're doing.</p>
+<p>I want to know you through all of it.<br>Not just who you are now, but who you'll become.</p>
+<p>I want to meet every version of you that life brings out, and I want you to meet every version of me too. I want us to grow without growing away from each other, to change, to learn, to become people neither of us could have imagined when we first met, and somehow still find pieces of the same two idiots we were at the beginning.</p>
+<p>Because maybe that's what forever really means to me.<br>Not staying exactly the same.<br>Staying familiar to each other while everything else changes.</p>
+<p>And if life ever takes us somewhere far from where we started, if there are oceans between us, different skies above us, different clocks telling us when it's morning, I hope you'll remember this:</p>
+<p>There is nowhere I'd rather be going than wherever life happens to take us together.</p>
+<p>So, take my hand when the train moves.<br>Lean on me when it gets too fast.<br>I'll sit beside you through the long stretches where there's nothing outside the window but passing lights and darkness.</p>
+<p>And if we ever miss our stop, well...<br>I suppose we'll just have to figure out where we are together.<br>That's enough for me.</p>
+<p>Because I don't think I need to know exactly where we're going anymore.<br>I just know who I want beside me when we get there.<br>You.</p>
+<p>My Alaia.<br>My mi amor.<br>My baby, my girlfriend, my wife, my best friend, my favorite person to be completely ridiculous with.</p>
+<p>The girl who somehow became my Saturdays.<br>The girl I met because of something as stupidly ordinary as a Dokito Burger.<br>The girl I fell in love with before I ever kissed her.</p>
+<p>And perhaps, years from now, when the two of us are sitting somewhere quiet and looking back at everything we've lived through, I'll remember this version of us, the one that is still figuring everything out, still dreaming, still a little scared, still ridiculously in love.</p>
+<p>And I'll probably look at you and laugh.<br>Maybe I'll say, "Remember when I wrote you that ridiculously long letter?"<br>And you'll probably make fun of me for it.<br>But I hope I'll still mean every word.</p>
+<p>I hope I'll still look at you the way I do now and have that same strange feeling of recognition.<br>That quiet feeling of,<br>There you are.</p>
+<p>My dear Alaia, if you ever wonder what I meant when I said I wanted more, this is what I meant.</p>
+<p>Not more of you because what you give me isn't enough.<br>More because knowing you has made me realize just how much life there is that I want to experience with you.</p>
+<p>More mornings.<br>More train rides.<br>More kitchens.<br>More countries.<br>More ordinary Saturdays.<br>More years I haven't met yet.<br>More of the life that hasn't happened.</p>
+<p>And when those years finally come, I don't need them to look like anything I've imagined.<br>Let them surprise us.<br>Let them be messy.<br>Let them be beautiful.<br>Let them be ours.</p>
+<p>I'll meet you there.</p>
+<p>So, my one and only hourglass, keep your hand in mine for as long as the sand allows. And when it finally reaches the bottom, I hope we can turn it over together and smile at how much time we still have left to spend.</p>
+<p>I love you, Alaia.</p>
+<p>Not as some beautiful ending to a letter, but as something that has quietly become part of who I am. And maybe that's why I could keep writing about you forever and still feel like I haven't said enough.</p>
+<p>But for tonight, I'll leave you with this:</p>
+<p class="closing-poem">If I had to live all of this life again just to find you at the end of it,<br>I'd take every wrong turn,<br>wait through every station,<br>sit through every distance,<br>and do it all over again<br>Just to arrive at you.</p>
+<p class="final-emoji">:DD</p>
+      </div>
+      <div class="scroll-cue"><svg viewBox="0 0 24 24" fill="none" stroke="#b79b6a" stroke-width="2" stroke-linecap="round"><path d="M12 4v15M5 12l7 7 7-7"/></svg></div>
+    </div>
+  </section>
+
+  <section id="flowerSection" class="flower-section">
+    <svg class="plant" viewBox="0 0 400 620" preserveAspectRatio="xMidYMax meet">
+      
+<defs>
+  <radialGradient id="petalOuter" cx="35%" cy="85%" r="80%">
+    <stop offset="0%" stop-color="#eafbff"/>
+    <stop offset="42%" stop-color="#53c7f0"/>
+    <stop offset="78%" stop-color="#6a4fd6"/>
+    <stop offset="100%" stop-color="#2c1a5e"/>
+  </radialGradient>
+  <radialGradient id="petalInner" cx="35%" cy="85%" r="80%">
+    <stop offset="0%" stop-color="#ffe3fb"/>
+    <stop offset="45%" stop-color="#d66bf0"/>
+    <stop offset="100%" stop-color="#5b1d8c"/>
+  </radialGradient>
+  <linearGradient id="stemGrad" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#0c2f33"/>
+    <stop offset="50%" stop-color="#1f6b63"/>
+    <stop offset="100%" stop-color="#0c2f33"/>
+  </linearGradient>
+  <radialGradient id="antherGrad" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#ffd98a"/>
+    <stop offset="100%" stop-color="#e8790f"/>
+  </radialGradient>
+  <radialGradient id="centerGlowOuter" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#e08cff" stop-opacity="0.45"/>
+    <stop offset="70%" stop-color="#8a5cff" stop-opacity="0.12"/>
+    <stop offset="100%" stop-color="#8a5cff" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#fff6ff" stop-opacity="0.95"/>
+    <stop offset="55%" stop-color="#ff8de9" stop-opacity="0.4"/>
+    <stop offset="100%" stop-color="#ff8de9" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="groundGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#b267ff" stop-opacity="0.25"/>
+    <stop offset="100%" stop-color="#b267ff" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="blurSoft" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur stdDeviation="8"/>
+  </filter>
+</defs>
+
+      <ellipse class="ground-glow" cx="200" cy="585" rx="130" ry="26" fill="url(#groundGlow)"/>
+      <g class="leaves">
+<path class="leaf" style="animation-delay:0s" d="M200,588 C150,573 110,543 90,493 C140,508 175,533 198,578 Z" fill="url(#stemGrad)"/>
+<path class="leaf" style="animation-delay:.12s" d="M200,588 C250,571 292,539 312,489 C262,506 226,531 202,576 Z" fill="url(#stemGrad)"/>
+<path class="leaf" style="animation-delay:.24s" d="M200,592 C165,584 132,562 116,525 C155,533 182,554 200,585 Z" fill="url(#stemGrad)" opacity="0.9"/>
+<path class="leaf" style="animation-delay:.36s" d="M200,592 C235,584 268,562 284,525 C245,533 218,554 200,585 Z" fill="url(#stemGrad)" opacity="0.9"/>
+      </g>
+      <path class="stem" d="M200,585 C193,480 207,380 199,270" fill="none" stroke="url(#stemGrad)" stroke-width="7" stroke-linecap="round"/>
+      <circle class="center-glow-outer" cx="200" cy="270" r="95" fill="url(#centerGlowOuter)" filter="url(#blurSoft)"/>
+      <circle class="center-glow" cx="200" cy="270" r="62" fill="url(#centerGlow)" filter="url(#blurSoft)"/>
+      <g class="flower-head" transform="translate(200,270)">
+<g class="petal" style="--angle:0deg;--scale-final:0.6;animation-delay:0.00s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalInner)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:120deg;--scale-final:0.58;animation-delay:0.12s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalInner)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:-120deg;--scale-final:0.62;animation-delay:0.24s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalInner)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:-150deg;--scale-final:1;animation-delay:0.05s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalOuter)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:-90deg;--scale-final:1;animation-delay:0.12s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalOuter)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:-30deg;--scale-final:1;animation-delay:0.19s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalOuter)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:30deg;--scale-final:1;animation-delay:0.26s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalOuter)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:90deg;--scale-final:1;animation-delay:0.33s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalOuter)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="petal" style="--angle:150deg;--scale-final:1;animation-delay:0.40s;"><path d="M0,0 C-5,-16 -18,-32 -21,-68 C-25,-108 -14,-138 0,-155 C14,-138 25,-108 21,-68 C18,-32 5,-16 0,0 Z" fill="url(#petalOuter)"/><path d="M0,-8 C-3,-45 -2,-95 0,-148" stroke="#ffffff" stroke-width="1" opacity="0.22" fill="none"/></g>
+<g class="stamen" style="--angle:-150deg;animation-delay:0.55s;"><path d="M0,0 Q9,-52 5.4,-104" fill="none" stroke="#ffe9b0" stroke-width="2.3" stroke-linecap="round"/><ellipse cx="5.4" cy="-104" rx="6" ry="9.5" fill="url(#antherGrad)"/><circle cx="4.1000000000000005" cy="-106.6" r="1.5" fill="#fff6df" opacity="0.85"/></g>
+<g class="stamen" style="--angle:-90deg;animation-delay:0.62s;"><path d="M0,0 Q-9,-52 -5.4,-111" fill="none" stroke="#ffe9b0" stroke-width="2.3" stroke-linecap="round"/><ellipse cx="-5.4" cy="-111" rx="6" ry="9.5" fill="url(#antherGrad)"/><circle cx="-6.7" cy="-113.6" r="1.5" fill="#fff6df" opacity="0.85"/></g>
+<g class="stamen" style="--angle:-30deg;animation-delay:0.69s;"><path d="M0,0 Q9,-52 5.4,-118" fill="none" stroke="#ffe9b0" stroke-width="2.3" stroke-linecap="round"/><ellipse cx="5.4" cy="-118" rx="6" ry="9.5" fill="url(#antherGrad)"/><circle cx="4.1000000000000005" cy="-120.6" r="1.5" fill="#fff6df" opacity="0.85"/></g>
+<g class="stamen" style="--angle:30deg;animation-delay:0.76s;"><path d="M0,0 Q-9,-52 -5.4,-104" fill="none" stroke="#ffe9b0" stroke-width="2.3" stroke-linecap="round"/><ellipse cx="-5.4" cy="-104" rx="6" ry="9.5" fill="url(#antherGrad)"/><circle cx="-6.7" cy="-106.6" r="1.5" fill="#fff6df" opacity="0.85"/></g>
+<g class="stamen" style="--angle:90deg;animation-delay:0.83s;"><path d="M0,0 Q9,-52 5.4,-111" fill="none" stroke="#ffe9b0" stroke-width="2.3" stroke-linecap="round"/><ellipse cx="5.4" cy="-111" rx="6" ry="9.5" fill="url(#antherGrad)"/><circle cx="4.1000000000000005" cy="-113.6" r="1.5" fill="#fff6df" opacity="0.85"/></g>
+<g class="stamen" style="--angle:150deg;animation-delay:0.90s;"><path d="M0,0 Q-9,-52 -5.4,-118" fill="none" stroke="#ffe9b0" stroke-width="2.3" stroke-linecap="round"/><ellipse cx="-5.4" cy="-118" rx="6" ry="9.5" fill="url(#antherGrad)"/><circle cx="-6.7" cy="-120.6" r="1.5" fill="#fff6df" opacity="0.85"/></g>
+<circle cx="-40.8" cy="12.9" r="2" class="sparkle" style="animation-delay:2.89s;animation-duration:2.15s;"/>
+<circle cx="3.4" cy="-62.1" r="2" class="sparkle" style="animation-delay:3.21s;animation-duration:2.76s;"/>
+<circle cx="-111.2" cy="-53.4" r="2" class="sparkle" style="animation-delay:3.38s;animation-duration:2.39s;"/>
+<circle cx="-38.7" cy="-42.8" r="2" class="sparkle" style="animation-delay:4.04s;animation-duration:2.32s;"/>
+<circle cx="-70.2" cy="30.5" r="2" class="sparkle" style="animation-delay:2.84s;animation-duration:2.72s;"/>
+<circle cx="36.3" cy="-60.5" r="2" class="sparkle" style="animation-delay:4.11s;animation-duration:2.54s;"/>
+<circle cx="11.2" cy="-83.5" r="2" class="sparkle" style="animation-delay:3.24s;animation-duration:2.18s;"/>
+<circle cx="49.9" cy="-10.3" r="2" class="sparkle" style="animation-delay:4.18s;animation-duration:2.55s;"/>
+<circle cx="-108.1" cy="-4.2" r="2" class="sparkle" style="animation-delay:3.57s;animation-duration:3.17s;"/>
+      </g>
+    </svg>
+    <div class="mote-field">
+<div class="mote" style="--tx:155px;--ty:-125px;left:45.8%;top:46.4%;animation-duration:7.52s;animation-delay:4.93s;"></div>
+<div class="mote" style="--tx:-34px;--ty:-126px;left:52.7%;top:49.5%;animation-duration:6.99s;animation-delay:3.65s;"></div>
+<div class="mote" style="--tx:-86px;--ty:-99px;left:52.6%;top:42.0%;animation-duration:6.6s;animation-delay:4.21s;"></div>
+<div class="mote" style="--tx:-44px;--ty:-74px;left:46.8%;top:45.9%;animation-duration:6.71s;animation-delay:5.5s;"></div>
+<div class="mote" style="--tx:85px;--ty:-55px;left:50.0%;top:46.5%;animation-duration:5.59s;animation-delay:5.04s;"></div>
+<div class="mote" style="--tx:-84px;--ty:-79px;left:54.0%;top:37.5%;animation-duration:7.8s;animation-delay:2.23s;"></div>
+<div class="mote" style="--tx:-56px;--ty:-92px;left:49.6%;top:47.8%;animation-duration:5.66s;animation-delay:3.73s;"></div>
+<div class="mote" style="--tx:-92px;--ty:-62px;left:45.6%;top:45.8%;animation-duration:6.25s;animation-delay:3.21s;"></div>
+<div class="mote" style="--tx:-59px;--ty:-70px;left:53.8%;top:48.5%;animation-duration:5.76s;animation-delay:5.36s;"></div>
+<div class="mote" style="--tx:-31px;--ty:-120px;left:47.2%;top:37.2%;animation-duration:6.24s;animation-delay:3.1s;"></div>
+<div class="mote" style="--tx:-122px;--ty:-36px;left:50.6%;top:37.7%;animation-duration:5.67s;animation-delay:3.77s;"></div>
+<div class="mote" style="--tx:-81px;--ty:-40px;left:47.3%;top:49.7%;animation-duration:7.4s;animation-delay:4.81s;"></div>
+<div class="mote" style="--tx:-70px;--ty:-116px;left:52.5%;top:43.9%;animation-duration:6.92s;animation-delay:0.52s;"></div>
+<div class="mote" style="--tx:-20px;--ty:-110px;left:47.9%;top:43.4%;animation-duration:7.85s;animation-delay:2.81s;"></div>
+    </div>
+  </section>
+</main>
+
+<button id="muteBtn" class="mute-btn" aria-label="Mute music">&#9834;</button>
+<!-- Put your mp3 in the same folder as this file and name it exactly paul.mp3 -->
+<audio id="bgAudio" src="paul.mp3" preload="auto" loop></audio>
+
+<script>
+(function(){
+  var cover = document.getElementById('cover');
+  var envelope = document.getElementById('envelope');
+  var audio = document.getElementById('bgAudio');
+  var muteBtn = document.getElementById('muteBtn');
+  var opened = false;
+
+  function openEnvelope(){
+    if (opened) return;
+    opened = true;
+    envelope.classList.add('open');
+    document.body.classList.remove('locked');
+    try {
+      var p = audio.play();
+      if (p && typeof p.catch === 'function') p.catch(function(){});
+    } catch (e) {}
+    setTimeout(function(){ cover.classList.add('hide'); }, 1500);
+  }
+  envelope.addEventListener('click', openEnvelope);
+
+  muteBtn.addEventListener('click', function(){
+    audio.muted = !audio.muted;
+    muteBtn.innerHTML = audio.muted ? '&#128263;' : '&#9834;';
+  });
+
+  var flowerSection = document.getElementById('flowerSection');
+  function bloomNow(){ flowerSection.classList.add('bloom'); }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) { bloomNow(); io.disconnect(); }
+      });
+    }, { threshold: 0.25 });
+    io.observe(flowerSection);
+  } else {
+    bloomNow();
+  }
+})();
+</script>
+</body>
+</html>
