@@ -386,8 +386,10 @@ body:not(.locked) .mute-btn{opacity:.85;pointer-events:auto;}
 </main>
 
 <button id="muteBtn" class="mute-btn" aria-label="Mute music">&#9834;</button>
-<!-- Put your mp3 in the same folder as this file and name it exactly paul.mp3 -->
-<audio id="bgAudio" src="paul.mp3" preload="auto" loop></audio>
+
+<audio id="bgAudio" preload="auto" loop>
+    <source src="paul.mp3" type="audio/mpeg">
+</audio>
 
 <script>
 (function(){
